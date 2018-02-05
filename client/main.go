@@ -11,7 +11,8 @@ import (
 	"net"
 	"log"
 	"strings"
-	//"strconv"
+	"bufio"
+	"encoding/base64"
 )
 
 var key *ecdsa.PrivateKey
@@ -29,15 +30,16 @@ func Handle(err error) {
 	}
 }
 
-func Send(from, to, node, amount string, priv *ecdsa.PrivateKey) {
+func Send(node, to, amount string, priv *ecdsa.PrivateKey) {
 	var input string
+	from := priv.X.String() + "::" + priv.Y.String()
 	conn, err := net.Dial("tcp", node)
 	Handle(err)
 
 	fmt.Println("Connected to node")
 
 	for {
-		fmt.Print("Would you like to send " + amount + "ƁƇ to "+to + " (Y/N): ")
+		fmt.Print("Would you like to send " + amount + "BC to "+to + " (Y/N): ")
 		_, err := fmt.Scanln(&input)
 		Handle(err)
 		
@@ -56,19 +58,24 @@ func Send(from, to, node, amount string, priv *ecdsa.PrivateKey) {
 	hashed.Write([]byte(amount + "->" + to))
 	signed, err := priv.Sign( rand.Reader, hashed.Sum(nil), crypto.SHA256 )
 	Handle(err)
-	fmt.Println("Signed: " + string(signed))
-	fmt.Fprintf(conn, "[%s]:%s->[%s]  %s", from, amount, to, signed)
+	fmt.Println("Signed: " + base64.StdEncoding.EncodeToString(signed))
+	fmt.Fprintf(conn, "%s||%s->%s##%s\n", from, amount, to, base64.StdEncoding.EncodeToString(signed))
 	fmt.Println("Sent!")
 }
 
 func RunCmd(cmd string) {
 	if strings.HasPrefix(cmd, "send ") {
-		//Send(strings.Split(cmd, " ")[1], strings.Split(cmd, " ")[2])
+		if key != nil {
+			args := strings.Split(cmd, " ")
+			Send(args[1], args[2], args[3], key)
+		} else {
+			println("Error: No key loaded!")
+		}
 	}
 	
 	switch cmd {
 	case "help":
-		fmt.Println("Command list: help, send {ID}, genkey, pubkey, privkey, exit")
+		fmt.Println("Command list: help, send {node address} {ID} {amount}, genkey, pubkey, privkey, exit")
 		
 	case "genkey":
 		var err error
@@ -76,10 +83,18 @@ func RunCmd(cmd string) {
 		Handle(err)
 		
 	case "pubkey":
-		fmt.Println( key.X.String() + "::" + key.Y.String() )
+		if key != nil {
+			fmt.Println( key.X.String() + "::" + key.Y.String() )
+		} else {
+			println("Error: No key loaded!")
+		}
 		
 	case "privkey":
-		fmt.Println( key.D.String() )
+		if key != nil {
+			fmt.Println( key.D.String() )
+		} else {
+			println("Error: No key loaded!")
+		}
 	case "exit":
 		os.Exit(0)
 		
@@ -96,11 +111,12 @@ func main() {
 		▒█▄▄█ ▀▀▀ ▀▀▀▀ ▀▀▀ ▀░▀ ▒█▄▄█ ▀▀▀▀ ▀▀▀ ▀░░▀
 	`)
 	fmt.Println(`Enter a command.  Run 'help' if you aren't familiar with the BlockCoin wallet software.`)
-	var input string
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("> ")
-		_, err := fmt.Scanln(&input)
-		Handle(err)
+		scanner.Scan()
+		Handle(scanner.Err())
+		input := scanner.Text()
 		
 		RunCmd(input)
 	}
