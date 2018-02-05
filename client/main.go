@@ -64,14 +64,6 @@ func Send(node, to, amount string, priv *ecdsa.PrivateKey) {
 }
 
 func RunCmd(cmd string) {
-	if strings.HasPrefix(cmd, "send ") {
-		if key != nil {
-			args := strings.Split(cmd, " ")
-			Send(args[1], args[2], args[3], key)
-		} else {
-			println("Error: No key loaded!")
-		}
-	}
 	
 	switch cmd {
 	case "help":
@@ -99,8 +91,16 @@ func RunCmd(cmd string) {
 		os.Exit(0)
 		
 	default:
-		fmt.Println("Error: Invalid command")
-		
+		if strings.HasPrefix(cmd, "send ") {
+			if key != nil {
+				args := strings.Split(cmd, " ")
+				Send(args[1], args[2], args[3], key)
+			} else {
+				println("Error: No key loaded!")
+			}
+		} else {
+			fmt.Println("Error: Invalid command")
+		}
 	}
 }
 
