@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"net"
-	"log"
 	"strings"
 	"bufio"
 	"encoding/base64"
@@ -24,9 +23,10 @@ Dear Rob Pike,
 Pls don't kill me,
 	The_Sushi/Ender
 */
+
 func Handle(err error) {
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
@@ -44,9 +44,9 @@ func Send(node, to, amount string, priv *ecdsa.PrivateKey) {
 		Handle(err)
 		
 		if input == "n" || input == "N" || input == "no" || input == "No" {
-	 		fmt.Println("Cancelled transaction")
-	 		return
-		}	else if input != "Y" && input != "y" && input != "yes" && input != "Yes" {
+			fmt.Println("Cancelled transaction")
+			return
+		} else if input != "Y" && input != "y" && input != "yes" && input != "Yes" {
 			fmt.Println("Not a valid option")
 		} else {
 			break
@@ -107,8 +107,8 @@ func RunCmd(cmd string) {
 func main() {
 	fmt.Printf("\033[1;35m%s\033[0m\n", `
 		▒█▀▀█ █░░ █▀▀█ █▀▀ █░█ ▒█▀▀█ █▀▀█ ░▀░ █▀▀▄ 
-		▒█▀▀▄ █░░ █░░█ █░░ █▀▄ ▒█░░░ █░░█ ▀█  █░░█ 
-		▒█▄▄█ ▀▀▀ ▀▀▀▀ ▀▀▀ ▀░▀ ▒█▄▄█ ▀▀▀▀ ▀▀▀ ▀░░▀
+		▒█▀▀▄ █░░ █░░█ █░░ █▀▄ ▒█░░░ █░░█ ▀█░ █░░█ 
+		▒█▄▄█ ▀▀▀ ▀▀▀▀ ▀▀▀ ▀ ▀ ▒█▄▄█ ▀▀▀▀ ▀▀▀ ▀  ▀
 	`)
 	fmt.Println(`Enter a command.  Run 'help' if you aren't familiar with the BlockCoin wallet software.`)
 	scanner := bufio.NewScanner(os.Stdin)
