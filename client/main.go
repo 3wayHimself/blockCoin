@@ -43,6 +43,8 @@ func Send(node, to, amount string, priv *ecdsa.PrivateKey) {
 		_, err := fmt.Scanln(&input)
 		Handle(err)
 		
+		/* It'd be more efficient to add regex for checking instead of piped IFs.
+		 * '[yY]es' or '[nN]o' looks way better too. */
 		if input == "n" || input == "N" || input == "no" || input == "No" {
 			fmt.Println("Cancelled transaction")
 			return
