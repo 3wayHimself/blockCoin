@@ -24,6 +24,8 @@ Pls don't kill me,
 	The_Sushi/Ender
 */
 
+/* You're missing classes/structs. Really bugging me... (I'm a whore for organized projects) */
+
 func Handle(err error) {
 	if err != nil {
 		panic(err)
@@ -61,7 +63,7 @@ func Send(node, to, amount string, priv *ecdsa.PrivateKey) {
 	signed, err := priv.Sign( rand.Reader, hashed.Sum(nil), crypto.SHA256 )
 	Handle(err)
 	fmt.Println("Signed: " + base64.StdEncoding.EncodeToString(signed))
-	fmt.Fprintf(conn, "%s||%s->%s##%s\n", from, amount, to, base64.StdEncoding.EncodeToString(signed))
+	fmt.Fprintf(conn, "%s||%s->%s##%s\n", from, amount, to, base64.StdEncoding.EncodeToString(signed)) 
 	fmt.Println("Sent!")
 }
 
